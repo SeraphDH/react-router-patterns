@@ -1,52 +1,57 @@
-import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import React, { Component } from "react";
 import "./NewColorForm.css";
 
-function NewColorForm({addColor}) {
+class NewColorForm extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      name: "",
+      hex: "#ffffff"
+    };
 
-  const [form, updateForm] = useState({name: "", hex:"#ffffff"});
-  const history = useHistory();
-
-  function handleChange(e) {
-    e.persist();
-    updateForm(f => ({ ...f, [e.target.name]: e.target.value }));
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  function handleSubmit(e) {
+  handleChange(e) {
+    this.setState({ [e.target.name]: e.target.value });
+  }
+
+  handleSubmit(e) {
     e.preventDefault();
-    addColor({ [form.name]: form.hex });
-    history.push("/colors");
+    this.props.addColor({ [this.state.name]: this.state.hex });
+    this.props.history.push("/colors");
   }
 
-  const {hex, name} = form;
-
-  return (
-    <div className="NewColor">
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="name">Color name</label>
-          <input
-            name="name"
-            id="name"
-            placeholder="Enter color name"
-            onChange={handleChange}
-            value={name}
-          />
-        </div>
-        <div>
-          <label htmlFor="hex">Color value</label>
-          <input
-            type="color"
-            name="hex"
-            id="hex"
-            onChange={handleChange}
-            value={hex}
-          />
-        </div>
-        <input type="Submit" value="Add this color" readOnly />
-      </form>
-    </div>
-  );
+  render() {
+    return (
+      <div className="NewColor">
+        <form onSubmit={this.handleSubmit}>
+          <div>
+            <label htmlFor="name">Color name</label>
+            <input
+              name="name"
+              id="name"
+              placeholder="Enter color name"
+              onChange={this.handleChange}
+              value={this.state.name}
+            />
+          </div>
+          <div>
+            <label htmlFor="hex">Color value</label>
+            <input
+              type="color"
+              name="hex"
+              id="hex"
+              onChange={this.handleChange}
+              value={this.state.hex}
+            />
+          </div>
+          <input type="Submit" value="Add this color" readOnly />
+        </form>
+      </div>
+    );
+  }
 }
 
 export default NewColorForm;

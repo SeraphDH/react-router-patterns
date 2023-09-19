@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { Component } from "react";
 import { Switch, Route, Redirect, BrowserRouter } from "react-router-dom";
 
 import ColorList from "./ColorList";
@@ -6,44 +6,53 @@ import NewColorForm from "./NewColorForm";
 import Color from "./Color";
 
 
-function Routes() {
+class Routes extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      colors: JSON.parse(localStorage.getItem("colors")) || {
+        red: "#FF0000",
+        green: "#00FF00",
+        blue: "#0000FF"
+      }
+    };
 
-  const initialColors = JSON.parse(localStorage.getItem("colors")) || {
-    red: "#FF0000",
-    green: "#00FF00",
-    blue: "#0000FF"
-  };
-  const [colors, updateColors] = useState(initialColors);
-
-  useEffect(
-    () => localStorage.setItem("colors", JSON.stringify(colors)),
-    [colors]
-  );
-
-  function handleAdd(newColorObj) {
-    updateColors(prevColors => ({ ...prevColors, ...newColorObj }));
+    this.handleAdd = this.handleAdd.bind(this);
   }
 
-  function renderCurrentColor(props) {
-    const { color } = props.match.params;
-    const hex = colors[color];
-    return <Color {...props} hex={hex} color={color} />;
-  };
+  handleAdd(newColor) {
+    this.setState(prevState => ({
+      colors: { ...newColor, ...prevState.colors }
+    }), () => {
+      // third param to setState is fn-to-run-when-done
+      localStorage.setItem("colors", JSON.stringify(this.state.colors))
+    });
+  }
 
-  return (
-    <BrowserRouter>
-      <Switch>
-        <Route exact path="/colors">
-          <ColorList colors={colors} />
-        </Route>
-        <Route exact path="/colors/new">
-          <NewColorForm addColor={handleAdd} />
-        </Route>
-        <Route path="/colors/:color" render={renderCurrentColor} />
-        <Redirect to="/colors" />
-      </Switch>
-    </BrowserRouter>
-  );
+  render() {
+    const colorListWithColors = () => <ColorList colors={this.state.colors} />;
+
+    const newColorWithHandler = props => (
+      <NewColorForm addColor={this.handleAdd} {...props} />
+    );
+
+    const currentColor = props => {
+      const colorName = props.match.params.color;
+      const hex = this.state.colors[colorName];
+      return <Color {...props} hex={hex} />;
+    };
+
+    return (
+      <BrowserRouter>
+        <Switch>
+          <Route exact path="/colors" render={colorListWithColors} />
+          <Route exact path="/colors/new" render={newColorWithHandler} />
+          <Route path="/colors/:color" render={currentColor} />
+          <Redirect to="/colors" />
+        </Switch>
+      </BrowserRouter>
+    );
+  }
 }
 
 export default Routes;
