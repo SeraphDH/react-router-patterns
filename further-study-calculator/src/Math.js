@@ -1,5 +1,4 @@
-import React from "react";
-import {useHistory, useParams} from "react-router-dom";
+import React, { Component } from "react";
 
 const NAME_TO_OPERATION = {
   add: (a, b) => a + b,
@@ -16,10 +15,12 @@ const NAME_TO_SYMBOL = {
 };
 
 
-function Math() {
+class Math extends Component {
+  constructor(props) {
+    super(props);
 
-  const history = useHistory();
-  const { operation, num1, num2 } = useParams();
+    this.doMath = this.doMath.bind(this);
+  }
 
   /** Do the underlying math
    *
@@ -29,29 +30,32 @@ function Math() {
    *
    **/
 
-  function doMath(name, num1, num2) {
+  doMath(name, num1, num2) {
     if (!NAME_TO_OPERATION[name]) {
-      history.push("/");
+      this.props.history.push("/");
       return null;
     }
 
     return NAME_TO_OPERATION[name](+num1, +num2);
   }
 
-  let result = doMath(operation, num1, num2);
+  render() {
+    let { operation, num1, num2 } = this.props.match.params;
+    let result = this.doMath(operation, num1, num2);
 
-  if (result === null) return null;
+    if (result === null) return null;
 
-  let symbol = NAME_TO_SYMBOL[operation];
+    let symbol = NAME_TO_SYMBOL[operation];
 
-  return (
-    <div>
-      <h1>HEY LOOK I DID SOME MATHZ</h1>
-      <h3>
-        {num1} {symbol} {num2} = {result}.
-      </h3>
-    </div>
-  );
+    return (
+      <div>
+        <h1>HEY LOOK I DID SOME MATHZ</h1>
+        <h3>
+          {num1} {symbol} {num2} = {result}.
+        </h3>
+      </div>
+    );
+  }
 }
 
 export default Math;
